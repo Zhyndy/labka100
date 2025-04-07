@@ -18,7 +18,6 @@ public class MainActivity extends AppCompatActivity {
     private Intent serviceIntent;
     public static final String ACTION_TAG = "my.custom.action.tag.lab6";
 
-    // Добавляем переменные для управления музыкой
     private MediaPlayer mediaPlayer;
     private Button buttonStartMusic;
     private Button buttonStopMusic;

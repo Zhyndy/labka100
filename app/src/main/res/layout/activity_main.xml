@@ -43,12 +43,13 @@
         android:layout_height="wrap_content"
         android:text="Start Music"
         android:layout_marginTop="20dp" />
+
     <Button
         android:id="@+id/button_stop_music"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Stop Music"
-        android:layout_marginTop="20dp" />
-
+        android:layout_marginTop="20dp"
+        />
 
 </LinearLayout>
