@@ -1,10 +1,10 @@
 package com.example.labka100;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.IBinder;
@@ -22,19 +22,39 @@ public class MyService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        soundPlayer = MediaPlayer.create(this, R.raw.song);  // Подключаем музыкальный файл из res/raw
-        soundPlayer.setLooping(true);  // Включаем зацикливание музыки
+        try {
+            // Используем AssetFileDescriptor для безопасного доступа к файлу
+            AssetFileDescriptor afd = getResources().openRawResourceFd(R.raw.song);
+            if (afd == null) {
+                Log.e("MyService", "Audio file not found in res/raw.");
+                stopSelf();
+                return;
+            }
+
+            soundPlayer = new MediaPlayer();
+            soundPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+            afd.close();
+            soundPlayer.prepare();
+            soundPlayer.setLooping(true);
+
+            Log.i("MyService", "MediaPlayer initialized. Duration = " + soundPlayer.getDuration());
+
+            soundPlayer.start();
+        } catch (Exception e) {
+            Log.e("MyService", "Error initializing MediaPlayer: ", e);
+            Toast.makeText(this, "Ошибка запуска музыки", Toast.LENGTH_SHORT).show();
+            stopSelf();
+        }
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Toast.makeText(this, "Service Started", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Сервис запущен", Toast.LENGTH_SHORT).show();
         Log.i("MyService", "Foreground service started...");
 
-        // Создаем канал уведомлений для Android 8.0 и выше
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String channelName = "Foreground Music Service";
-            String channelDescription = "This channel is used for foreground music playback notifications.";
+            String channelDescription = "Channel for music playback";
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
 
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, channelName, importance);
@@ -43,35 +63,42 @@ public class MyService extends Service {
             notificationManager.createNotificationChannel(channel);
         }
 
-        // Создаем уведомление для Foreground Service
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_music)  // Убедитесь, что иконка есть в res/drawable
-                .setContentTitle("My Music Player")
-                .setContentText("Music is playing...")
-                .setOngoing(true)  // Уведомление будет постоянно отображаться, пока сервис работает
+                .setSmallIcon(R.drawable.ic_music)
+                .setContentTitle("Музыкальный сервис")
+                .setContentText("Музыка играет...")
+                .setOngoing(true)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
-        // Запускаем сервис в Foreground
         startForeground(1, builder.build());
 
-        // Начинаем воспроизведение музыки
-        soundPlayer.start();
+        // Убеждаемся, что музыка продолжает играть
+        try {
+            if (soundPlayer != null && !soundPlayer.isPlaying()) {
+                soundPlayer.start();
+            }
+        } catch (Exception e) {
+            Log.e("MyService", "Ошибка при запуске музыки", e);
+        }
 
-        // Возвращаем START_STICKY, чтобы сервис не был остановлен системой
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        soundPlayer.stop();
-        Toast.makeText(this, "Service Stopped", Toast.LENGTH_SHORT).show();
+        if (soundPlayer != null) {
+            soundPlayer.stop();
+            soundPlayer.release();
+            soundPlayer = null;
+        }
+        Toast.makeText(this, "Сервис остановлен", Toast.LENGTH_SHORT).show();
         Log.i("MyService", "Foreground service stopped...");
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;  // Мы не используем биндинг
+        return null;
     }
 }
