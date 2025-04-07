@@ -23,7 +23,6 @@ public class MyService extends Service {
     public void onCreate() {
         super.onCreate();
         try {
-
             AssetFileDescriptor afd = getResources().openRawResourceFd(R.raw.song);
             if (afd == null) {
                 Log.e("MyService", "Audio file not found in res/raw.");
@@ -71,6 +70,8 @@ public class MyService extends Service {
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         startForeground(1, builder.build());
+
+        // Запуск музыки, если она не играет
         try {
             if (soundPlayer != null && !soundPlayer.isPlaying()) {
                 soundPlayer.start();
@@ -79,7 +80,26 @@ public class MyService extends Service {
             Log.e("MyService", "Ошибка при запуске музыки", e);
         }
 
+        // Добавьте проверку на команду остановки
+        if (intent != null && intent.getAction() != null) {
+            if (intent.getAction().equals("STOP_MUSIC")) {
+                stopMusic();
+            }
+        }
+
         return START_STICKY;
+    }
+
+    private void stopMusic() {
+        if (soundPlayer != null && soundPlayer.isPlaying()) {
+            soundPlayer.stop();
+            soundPlayer.release();
+            soundPlayer = null;
+            stopForeground(true);  // Остановка уведомления
+            stopSelf();  // Остановка сервиса
+            Toast.makeText(this, "Музыка остановлена", Toast.LENGTH_SHORT).show();
+            Log.i("MyService", "Музыка остановлена");
+        }
     }
 
     @Override
