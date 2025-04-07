@@ -23,7 +23,7 @@ public class MyService extends Service {
     public void onCreate() {
         super.onCreate();
         try {
-            // Используем AssetFileDescriptor для безопасного доступа к файлу
+
             AssetFileDescriptor afd = getResources().openRawResourceFd(R.raw.song);
             if (afd == null) {
                 Log.e("MyService", "Audio file not found in res/raw.");
@@ -71,8 +71,6 @@ public class MyService extends Service {
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         startForeground(1, builder.build());
-
-        // Убеждаемся, что музыка продолжает играть
         try {
             if (soundPlayer != null && !soundPlayer.isPlaying()) {
                 soundPlayer.start();

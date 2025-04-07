@@ -1,20 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
     android:gravity="center">
 
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="204dp"
+        android:layout_height="177dp"
+        app:srcCompat="@drawable/ic_music" />
+
     <EditText
         android:id="@+id/editText_randomCharacter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="Random character"
+        android:layout_marginBottom="20dp"
         android:enabled="false"
-        android:textSize="24sp"
         android:gravity="center"
-        android:layout_marginBottom="20dp"/>
+        android:hint="Random character"
+        android:textSize="24sp" />
 
     <Button
         android:id="@+id/button_start"
