@@ -21,7 +21,8 @@
         android:enabled="false"
         android:gravity="center"
         android:hint="Random character"
-        android:textSize="24sp" />
+        android:textSize="24sp"
+        android:textColor="@color/black"/>
 
     <Button
         android:id="@+id/button_start"
