@@ -82,3 +82,25 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(broadcastReceiver, intentFilter, Context.RECEIVER_EXPORTED);
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(broadcastReceiver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mediaPlayer != null) {
+            mediaPlayer.release(); // Освобождение ресурсов
+        }
+    }
+
+    class MyBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            char data = intent.getCharExtra("randomCharacter", '?');
+            randomCharacterEditText.setText(String.valueOf(data));
+        }
+    }
+}
